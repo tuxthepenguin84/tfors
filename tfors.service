@@ -1,0 +1,23 @@
+[Unit]
+Description=TensorFlow Object Recognition Service
+After=network.service
+
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python /root/scripts/server.py \
+    -m https://tfhub.dev/tensorflow/centernet/resnet50v1_fpn_512x512/1 \
+    -l /root/scripts/mscoco_label_map.pbtxt \
+    -d
+
+StandardOutput=append:/var/log/tfors/tfors.log
+StandardError=append:/var/log/tfors/error.log
+Environment=PYTHONUNBUFFERED=1
+
+Restart=on-failure
+RestartSec=30s
+
+[Install]
+WantedBy=multi-user.target
