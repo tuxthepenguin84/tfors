@@ -1,0 +1,19 @@
+version: '3'
+services:
+  tfors:
+    image: tuxthepenguin/tfors:latest
+    container_name: tfors
+    networks:
+      - proxy
+    environment:
+      - TFORSMODELURL=https://tfhub.dev/tensorflow/centernet/resnet50v1_fpn_512x512/1 #https://tfhub.dev/tensorflow/collections/object_detection/1
+      - TFORSENCODING=utf-8
+      - TFORSBUFFER=4096
+    ports:
+      - '4949:4949'
+    restart: unless-stopped
+
+networks:
+  proxy:
+    driver: overlay
+    external: true
