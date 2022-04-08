@@ -20,7 +20,6 @@ parser.add_argument("-p", "--port", help="TCP Port to listen on. Example: 4949",
 parser.add_argument("-b", "--buffer", help="Buffer size. Example: 4096", type=int, default=4096)
 parser.add_argument("-m", "--model", help="TensorFlow Hub model to use for inference. Example: https://tfhub.dev/tensorflow/centernet/resnet50v1_fpn_512x512/1 or /path/to/centernet_resnet50v1_fpn_512x512_1", required=True)
 parser.add_argument("-l", "--labels", help="Labels mapping file. Example: /path/to/mscoco_label_map.pbtxt or C:\path\to\mscoco_label_map.pbtxt", required=True)
-#parser.add_argument("-o", "--locale", help="Set locale. | Example : en_US", default='en_US')
 parser.add_argument("-e", "--encoding", help="Set encoding. | Example : utf-8", default='utf-8')
 parser.add_argument("-d", "--logging", help="Output logging information.", default=False, action='store_true')
 args = parser.parse_args()
