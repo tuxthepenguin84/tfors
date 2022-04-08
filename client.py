@@ -15,7 +15,6 @@ parser.add_argument("-f", "--file", help="Path to file", default=None) # accepts
 parser.add_argument("-s", "--server", help="The host/IP address of the server", required=True)
 parser.add_argument("-p", "--port", help="TCP Port to send to. Example: 4949", type=int, default=4949)
 parser.add_argument("-b", "--buffer", help="Buffer size. Example: 4096", type=int, default=4096)
-#parser.add_argument("-o", "--locale", help="Set locale. | Example : en_US", default='en_US')
 parser.add_argument("-e", "--encoding", help="Set encoding. | Example : utf-8", default='utf-8')
 parser.add_argument("-c", "--objectclass", help="Object class to recognize. | Example : cat", default=None)
 parser.add_argument("-x", "--detectionbox", help="Detection box size (0.0 min - 1.0 max) [y_min, x_min, y_max, x_max] | Example : 0.0 0.0 0.5 0.5", nargs='+', default=None)
