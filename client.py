@@ -2,7 +2,6 @@ import argparse
 from datetime import datetime
 import locale
 import os
-import pandas as pd
 from pathlib import Path
 import pickle
 import socket
