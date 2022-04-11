@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     protobuf-compiler \
     apt-transport-https \
     ca-certificates \
+    netcat-openbsd \
  && update-ca-certificates \
  && rm -rf /var/lib/apt/lists/* \
  && git clone https://github.com/tuxthepenguin84/tfors.git tfors \
@@ -23,6 +24,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && cp object_detection/packages/tf2/setup.py . \
  && python -m pip install . \
  && pip install httplib2
-HEALTHCHECK CMD curl -f http://localhost:4949 || exit 1
+#HEALTHCHECK CMD nc -z localhost 4949
 EXPOSE 4949/tcp
 CMD python -u /tfors/server.py -d -l /models/research/object_detection/data/mscoco_label_map.pbtxt -m $TFORSMODELURL -b $TFORSBUFFER  -e $TFORSENCODING
