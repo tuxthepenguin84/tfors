@@ -15,7 +15,7 @@ parser.add_argument("-s", "--server", help="The host/IP address of the server, r
 parser.add_argument("-p", "--port", help="TCP Port to send to. | Example (default): 4949", type=int, default=4949)
 parser.add_argument("-b", "--buffer", help="Buffer size. | Example (default): 4096", type=int, default=4096)
 parser.add_argument("-e", "--encoding", help="Set encoding. | Example (default): utf-8", default='utf-8')
-parser.add_argument("-c", "--objectclass", help="Object class to recognize. | Example: cat", default=None)
+parser.add_argument("-c", "--objectclass", help="Object class(s) to recognize. | Example 1: cat | Example 2: car airplane 'potted plant' chair | Notes: When using multiple object classes, --maxresults is ignored", nargs='+', default=None)
 parser.add_argument("-x", "--detectionbox", help="Detection box size (0.0 min - 1.0 max) [y_min, x_min, y_max, x_max] | Example : 0.0 0.0 0.5 0.5", nargs='+', default=None)
 parser.add_argument("-m", "--minscore", help="Minimum detection score (percent). | Example (default): 60", type=int, default=60)
 parser.add_argument("-a", "--maxresults", help="Max results returned. | Example (default): 1", type=int, default=1)
@@ -35,10 +35,14 @@ BUFFER_SIZE = args.buffer # Bytes to receive each time
 SEPARATOR = "###"
 
 # Client Parameters
-fileObjectClass = args.objectclass
+if isinstance(args.objectclass, list):
+    fileObjectClass = list((map(lambda x: x.lower(), args.objectclass)))
+    fileMaxResults = len(fileObjectClass)
+elif args.objectclass == None:
+    fileObjectClass = None
+    fileMaxResults = args.maxresults
 fileBox = args.detectionbox
 fileMinScore = args.minscore
-fileMaxResults = args.maxresults
 
 # Functions
 def sendFile(fileName):
@@ -80,9 +84,9 @@ def sendFile(fileName):
 
     # Store results
     resultNumDetections, allResultClasses, allResultScores, allResultBoxes = inferenceResults['num_detections'][0].astype(int), inferenceResults['detection_classes'][0], inferenceResults["detection_scores"][0], inferenceResults["detection_boxes"][0]
-    
+        
     # Begin outputting
-    silentExit = None
+    silentExit = 1
     if args.output == "raw":
         print(inferenceResults)
     else:
@@ -98,16 +102,25 @@ def sendFile(fileName):
                         withinBox = True
                     else:
                         withinBox = False
+                        # Only output when objects are within box
+                        if args.output != "silent":
+                            continue
                 else:
                     withinBox = None
                 
                 # Determine if object class found
-                if fileObjectClass != None and fileObjectClass.lower() == categoryIndex[allResultClasses[i]]["name"]:
-                    resultClassFound = True
-                elif fileObjectClass != None and fileObjectClass.lower() != allResultClasses[i]:
-                    resultClassFound = False
+                if fileObjectClass != None:
+                    for currentObjectClass in range(len(fileObjectClass)):
+                        if fileObjectClass[currentObjectClass] == categoryIndex[allResultClasses[i]]["name"]:
+                            resultClassFound = True
+                            break
+                        else:
+                            resultClassFound = False
+                    # Only output when classes that were specified are found
+                    if resultClassFound == False and args.output != "silent":
+                        continue
                 else:
-                    resultClassFound = None
+                    resultClassFound = None                
                 
                 # Print output
                 if args.output == "silent":
@@ -153,6 +166,7 @@ def sendFile(fileName):
     clientSocket.close()
     # Check for silent output
     if args.output == "silent":
+        #print(silentExit)
         sys.exit(silentExit)
 
 # Check for pipeline input, folder, or file and call sendFile()
