@@ -19,7 +19,7 @@ parser.add_argument("-c", "--objectclass", help="Object class to recognize. | Ex
 parser.add_argument("-x", "--detectionbox", help="Detection box size (0.0 min - 1.0 max) [y_min, x_min, y_max, x_max] | Example : 0.0 0.0 0.5 0.5", nargs='+', default=None)
 parser.add_argument("-m", "--minscore", help="Minimum detection score (percent). | Example (default): 60", type=int, default=60)
 parser.add_argument("-a", "--maxresults", help="Max results returned. | Example (default): 1", type=int, default=1)
-parser.add_argument("-u", "--output", help="Output type: simple, detailed, json, raw. | Example (default): simple", default="simple")
+parser.add_argument("-u", "--output", help="Output type: silent, simple, detailed, json, onlyclass, onlyscore, onlybox, onlyclassfound, onlywithinbox, raw. | Example (default): simple", default="simple")
 parser.add_argument("-d", "--logging", help="Output logging information.", default=False, action='store_true')
 args = parser.parse_args()
 
@@ -82,14 +82,13 @@ def sendFile(fileName):
     resultNumDetections, allResultClasses, allResultScores, allResultBoxes = inferenceResults['num_detections'][0].astype(int), inferenceResults['detection_classes'][0], inferenceResults["detection_scores"][0], inferenceResults["detection_boxes"][0]
     
     # Begin outputting
+    silentExit = None
     if args.output == "raw":
         print(inferenceResults)
     else:
         jsonOutput = []
         for i in range(resultNumDetections):
             if allResultScores[i] >= fileMinScore/100 and i < fileMaxResults:
-                withinBox = None
-                resultClassFound = None
                 
                 # Determine if object in detection box
                 if fileBox != None: # [y_min, x_min, y_max, x_max]
@@ -111,10 +110,21 @@ def sendFile(fileName):
                     resultClassFound = None
                 
                 # Print output
-                if args.output == "simple":
+                if args.output == "silent":
+                    if resultClassFound == True and withinBox == None: # Class only
+                        silentExit = 0
+                        break
+                    elif resultClassFound == None and withinBox == True: # Box only
+                        silentExit = 0
+                        break
+                    elif resultClassFound == True and withinBox == True: # Class & Box
+                        silentExit = 0
+                        break
+                    else:
+                        silentExit = 1
+                elif args.output == "simple":
                     print(f'{baseName}, {categoryIndex[allResultClasses[i]]["name"]}, {int(allResultScores[i] * 100)}, {allResultBoxes[i]}, {resultClassFound}, {withinBox}')
                 elif args.output == "detailed":
-                    print('----------')
                     print(f'Filename: {baseName}')
                     print(f'Inferenced Class: {categoryIndex[allResultClasses[i]]["name"]}')
                     print(f'Inferenced Score: {int(allResultScores[i] * 100)}%')
@@ -123,15 +133,27 @@ def sendFile(fileName):
                     print(f'Within Detection Box: {withinBox}')
                 elif args.output == "json":
                     jsonOutput.append({ "Filename":baseName, "Inferenced Class":categoryIndex[allResultClasses[i]]["name"], "Inferenced Score":int(allResultScores[i] * 100), "Inferenced Box":str(allResultBoxes[i]), "Class Found":resultClassFound, "Within Detection Box":withinBox})
+                elif args.output == "onlyclass":
+                    print(f'{categoryIndex[allResultClasses[i]]["name"]}')
+                elif args.output == "onlyscore":
+                    print(f'{int(allResultScores[i] * 100)}%')
+                elif args.output == "onlybox":
+                    print(f'{allResultBoxes[i]}')
+                elif args.output == "onlyclassfound":
+                    print(f'{resultClassFound}')
+                elif args.output == "onlywithinbox":
+                    print(f'{withinBox}')
                 else:
                     print(f'Unknown output option specified.')
-    
+    # Print JSON output
     if args.output == "json":
         print(json.dumps(jsonOutput, indent=3))
-    
     # Close the client socket
     if args.logging: print(f'{datetime.now().strftime("%c")} | Closing Connection')
     clientSocket.close()
+    # Check for silent output
+    if args.output == "silent":
+        sys.exit(silentExit)
 
 # Check for pipeline input, folder, or file and call sendFile()
 if args.file == None:
