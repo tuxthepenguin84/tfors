@@ -108,16 +108,16 @@ python client.py -f path\to\image.jpg -s server_ip
 
 ### Docker/Traditional App Arguments (Client)
 ```
-parser.add_argument("-f", "--file", help="Path to file", default=None) # accepts pipeline input
-parser.add_argument("-s", "--server", help="The host/IP address of the server", required=True)
-parser.add_argument("-p", "--port", help="TCP Port to send to. Example: 4949", type=int, default=4949)
-parser.add_argument("-b", "--buffer", help="Buffer size. Example: 4096", type=int, default=4096)
-parser.add_argument("-e", "--encoding", help="Set encoding. | Example : utf-8", default='utf-8')
-parser.add_argument("-c", "--objectclass", help="Object class to recognize. | Example : cat", default=None)
+parser.add_argument("-f", "--file", help="Path to file, also accepts pipeline input", default=None) # accepts pipeline input
+parser.add_argument("-s", "--server", help="The host/IP address of the server, required.", required=True)
+parser.add_argument("-p", "--port", help="TCP Port to send to. | Example (default): 4949", type=int, default=4949)
+parser.add_argument("-b", "--buffer", help="Buffer size. | Example (default): 4096", type=int, default=4096)
+parser.add_argument("-e", "--encoding", help="Set encoding. | Example (default): utf-8", default='utf-8')
+parser.add_argument("-c", "--objectclass", help="Object class(s) to recognize. | Example 1: cat | Example 2: car airplane 'potted plant' chair | Notes: When using multiple object classes, --maxresults is ignored", nargs='+', default=None)
 parser.add_argument("-x", "--detectionbox", help="Detection box size (0.0 min - 1.0 max) [y_min, x_min, y_max, x_max] | Example : 0.0 0.0 0.5 0.5", nargs='+', default=None)
-parser.add_argument("-m", "--minscore", help="Minimum detection score (percent). | Example : 60", type=int, default=60)
-parser.add_argument("-a", "--maxresults", help="Max results returned. | Example : 1", type=int, default=1)
-parser.add_argument("-u", "--output", help="Output type: simple, detailed, json, raw. | Example : simple", default="simple")
+parser.add_argument("-m", "--minscore", help="Minimum detection score (percent). | Example (default): 60", type=int, default=60)
+parser.add_argument("-a", "--maxresults", help="Max results returned. | Example (default): 1", type=int, default=1)
+parser.add_argument("-u", "--output", help="Output type: silent, simple, detailed, json, onlyclass, onlyscore, onlybox, onlyclassfound, onlywithinbox, raw. | Example (default): simple", default="simple")
 parser.add_argument("-d", "--logging", help="Output logging information.", default=False, action='store_true')
 ```
 
